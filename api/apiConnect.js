@@ -24,7 +24,7 @@ apiConnect.apiRequest=async(query,argument)=>{
         }
         rp.post(option)
             .then((body)=>{
-                resolve(JSON.parse(body));
+                resolve(body);
             })
             .catch((err)=>{
                 console.log("Http Request Error");

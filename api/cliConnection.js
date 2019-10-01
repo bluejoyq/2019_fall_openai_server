@@ -15,9 +15,14 @@ cliConnection.cliReq=(req,res)=>{ // 미완성 함수
 
 //테스트용 지우지마
 const run=async()=>{
-    let x = await textAnalytic({"text":"테스트용 문장입니다."});
-    console.log(x);
-}
+    let startTime = new Date().getTime();
+    let x = await textAnalytic({"text":"2019년 고등학교 1학년 교육과정은 어떻게 되나요?"});
+    let endTime = new Date().getTime();
+
+    console.log(endTime - startTime);
+    //console.log(typeof(x));
+    console.log(x); 
+};
 
 run();
 module.exports=cliConnection; 
