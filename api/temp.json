@@ -151,6 +151,158 @@
                 ],
                 "entity": []
             }
+        },
+        {
+            "request_id": "reserved field",
+            "result": 0,
+            "return_type": "com.google.gson.internal.LinkedTreeMap",
+            "return_object": {
+                "doc_id": "",
+                "DCT": "",
+                "category": "",
+                "category_weight": 0,
+                "title": {
+                    "text": "",
+                    "NE": ""
+                },
+                "metaInfo": {},
+                "paragraphInfo": [],
+                "sentence": [
+                    {
+                        "id": 0,
+                        "reserve_str": "",
+                        "text": "감기 걸렸을 때 먹으면 좋은것은?",
+                        "morp": [
+                            {
+                                "id": 0,
+                                "lemma": "감기",
+                                "type": "NNG",
+                                "position": 0,
+                                "weight": 0.262769
+                            },
+                            {
+                                "id": 1,
+                                "lemma": "걸리",
+                                "type": "VV",
+                                "position": 7,
+                                "weight": 0.0150266
+                            },
+                            {
+                                "id": 2,
+                                "lemma": "었",
+                                "type": "EP",
+                                "position": 10,
+                                "weight": 0.9
+                            },
+                            {
+                                "id": 3,
+                                "lemma": "을",
+                                "type": "ETM",
+                                "position": 13,
+                                "weight": 0.00734398
+                            },
+                            {
+                                "id": 4,
+                                "lemma": "때",
+                                "type": "NNG",
+                                "position": 17,
+                                "weight": 0.656522
+                            },
+                            {
+                                "id": 5,
+                                "lemma": "먹",
+                                "type": "VV",
+                                "position": 21,
+                                "weight": 0.0143325
+                            },
+                            {
+                                "id": 6,
+                                "lemma": "으면",
+                                "type": "EC",
+                                "position": 24,
+                                "weight": 0.427071
+                            },
+                            {
+                                "id": 7,
+                                "lemma": "좋",
+                                "type": "VA",
+                                "position": 31,
+                                "weight": 0.0501571
+                            },
+                            {
+                                "id": 8,
+                                "lemma": "은",
+                                "type": "ETM",
+                                "position": 34,
+                                "weight": 0.155123
+                            },
+                            {
+                                "id": 9,
+                                "lemma": "것",
+                                "type": "NNB",
+                                "position": 37,
+                                "weight": 0.228788
+                            },
+                            {
+                                "id": 10,
+                                "lemma": "은",
+                                "type": "JX",
+                                "position": 40,
+                                "weight": 0.0688243
+                            },
+                            {
+                                "id": 11,
+                                "lemma": "?",
+                                "type": "SF",
+                                "position": 43,
+                                "weight": 1
+                            }
+                        ],
+                        "WSD": [],
+                        "word": [
+                            {
+                                "id": 0,
+                                "text": "감기",
+                                "type": "",
+                                "begin": 0,
+                                "end": 0
+                            },
+                            {
+                                "id": 1,
+                                "text": "걸렸을",
+                                "type": "",
+                                "begin": 1,
+                                "end": 3
+                            },
+                            {
+                                "id": 2,
+                                "text": "때",
+                                "type": "",
+                                "begin": 4,
+                                "end": 4
+                            },
+                            {
+                                "id": 3,
+                                "text": "먹으면",
+                                "type": "",
+                                "begin": 5,
+                                "end": 6
+                            },
+                            {
+                                "id": 4,
+                                "text": "좋은것은?",
+                                "type": "",
+                                "begin": 7,
+                                "end": 11
+                            }
+                        ],
+                        "NE": [],
+                        "dependency": [],
+                        "SRL": []
+                    }
+                ],
+                "entity": []
+            }
         }
     ],
     "full": [

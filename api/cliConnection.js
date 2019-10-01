@@ -16,10 +16,10 @@ cliConnection.cliReq=(req,res)=>{ // 미완성 함수
 //테스트용 지우지마
 const run=async()=>{
     let startTime = new Date().getTime();
-    let x = await textAnalytic({"text":"2019년 고등학교 1학년 교육과정은 어떻게 되나요?"});
+    let x = await textAnalytic({"text":"감기 걸렸을 때 먹으면 좋은것은?"});
     let endTime = new Date().getTime();
 
-    console.log(endTime - startTime);
+    console.log("걸리는 시간 :",endTime - startTime);
     //console.log(typeof(x));
     console.log(x); 
 };
