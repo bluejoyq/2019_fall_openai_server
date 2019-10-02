@@ -16,7 +16,7 @@ cliConnection.cliReq=(req,res)=>{ // 미완성 함수
 //테스트용 지우지마
 const run=async()=>{
     let startTime = new Date().getTime();
-    let x = await textAnalytic({"text":"달리기 잘하는 방법을 알고싶어요."});
+    let x = await textAnalytic({"text":"달리기 잘하는 방법을 알고 싶어요"});
     let endTime = new Date().getTime();
     //console.log(typeof(x));
     console.log("need",x.morp.need); 
