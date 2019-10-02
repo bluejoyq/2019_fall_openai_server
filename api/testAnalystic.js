@@ -2,6 +2,7 @@ const apiConnect = require('./apiConnect');
 const search = require('./search');
 
 const apiRequest= apiConnect.apiRequest;
+const koreanRequest = apiConnect.koreanRequest;
 
 const textMean = "WiseNLU";
 const argumentFrame = {
@@ -10,7 +11,7 @@ const argumentFrame = {
 };
 
 const fineMorp = [ "NNG","NNP","NNB","VA","MM","SL","SH","SN","XPN","XSN","XSA","ETM"]
-const vvCheck = ["ETM","ETN","EC"];
+const vvCheck = ["ETM","ETN"];
 
 
 const getMorp=(data)=>{
@@ -51,35 +52,46 @@ const getKeyword=(data)=>{
     let need = [];
     let notNeed = [];
 
-    data.forEach((word)=>{
+    for(let j=0; j < data.length; j++){
         let needTemp = [];
         let notNeedTemp = [];
         let type = 0;
         let check = false;
-        word.find(morp=>{
+        data[j].find(morp=>{
             if(morp.type == "VV") type = 1;
             if(morp.type == "XSV") type = 2;
-            if(morp.type == "VX") type = 3;
+            if(morp.type == "VX" || morp.type == "EF") type = 3;
         })
         if(type == 3){
-            notNeed.push(word);
+            notNeed.push(data[j]);
         }
         else if(type == 2){
-            need.push(word);
+            let temp = true;
+            for(let i = 0; i < data[j].length; i++){
+                if(data[j][i].type.indexOf("EC")!=-1){
+                    
+                    data[j+1].forEach((morp)=>{
+                        if(fineMorp.indexOf(morp.type)!=-1) temp = false;
+                    });
+                }
+            }
+            if(temp == false) notNeed.push(data[j])
+            else need.push(data[j]);
+            
         }
         else if(type == 1){
-            for(let i = 0; i < word.length; i++){
-                if(vvCheck.indexOf(word[i].type)!=-1){
+            for(let i = 0; i < data[j].length; i++){
+                if(vvCheck.indexOf(data[j][i].type)!=-1){
                     check = true;
-                    need.push(word);
+                    need.push(data[j]);
                 }
             }
             if(check == false){
-                notNeed.push(word);
+                notNeed.push(data[j]);
             }
         }
         else if(type == 0){
-            word.forEach((morp)=>{
+            data[j].forEach((morp)=>{
                 if(fineMorp.indexOf(morp.type)!=-1){
                     needTemp.push(morp);
                 }
@@ -90,21 +102,28 @@ const getKeyword=(data)=>{
             if(notNeedTemp.length > 0) notNeed.push(notNeedTemp);
             if(needTemp.length > 0) need.push(needTemp);
         }
-    });
+    }
 
     return({"need":need,"notNeed":notNeed});
 }
 
 const textAnalystic=(getData)=>{
     return new Promise(async(resolve,reject)=>{
+        let fixedText = await koreanRequest(getData.text);
+
         let argument = argumentFrame;
-        argumentFrame.text = getData.text;
-        // 원래 텍스트 보존은?
-        let result = await apiRequest(textMean,argument);
-        let data ={}
-        data.morps= result.return_object.sentence[0].morp;
-        data.text = result.return_object.sentence[0].text
-        resolve(getMorp(data).then(getKeyword));
+        argumentFrame.text = fixedText.message.result.notag_html;
+        let getText = await apiRequest(textMean,argument);
+
+        let data ={"morps":getText.return_object.sentence[0].morp,"text":getText.return_object.sentence[0].text};
+        
+        let Morp = await getMorp(data).then(getKeyword);
+        let result = {
+            "originalText":data.text,
+            "korean":fixedText.message.result,
+            "morp":Morp,
+        }
+        resolve(result);
     });
     
 }
