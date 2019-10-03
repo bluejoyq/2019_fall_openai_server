@@ -14,7 +14,6 @@ const requestJson = {
 let apiConnect = {};
 
 apiConnect.apiRequest=async(query,argument)=>{
-
     return new Promise((resolve,reject)=>{
         let reqJson = requestJson;
         reqJson.argument = argument;
@@ -30,6 +29,7 @@ apiConnect.apiRequest=async(query,argument)=>{
             .catch((err)=>{
                 console.log("Http Request Error");
                 console.log(err.response.body);
+                
             });
     });
 }
