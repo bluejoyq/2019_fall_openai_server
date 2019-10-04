@@ -1,6 +1,6 @@
 const apiConnect = require('./apiConnect');
 
-const apiReq = apiConnect.apiRequest;
+;
 
 const query = "WiseASR/Recognition";
 const argumentFrame = {
@@ -11,9 +11,14 @@ const argumentFrame = {
 const STT=async(getData)=>{
     let argument = argumentFrame;
     argument.audio = getData.audio;
-    getSTT=await apiReq(query,argument);
-    getData.text = getSTT.return_object.recognized;
-    return getData;
+    let getSTT= await apiConnect.ETRIapiRequest( query, argument );
+    return { "text" : getSTT.return_object.recognized };
 }
 
-module.exports=STT;
+const clientReq = async ( req , res ) => { 
+    let clientData = JSON.parse( req.body.data );
+    let voiceTemp = await STT( clientData );
+    res.send(voiceTemp);
+};
+
+module.exports=clientReq;

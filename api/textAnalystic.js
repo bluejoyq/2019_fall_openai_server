@@ -1,179 +1,235 @@
 const apiConnect = require('./apiConnect');
 const search = require('./search');
 
-const apiReq= apiConnect.apiRequest;
-const koreanReq = apiConnect.koreanRequest;
+const apiQuery = "WiseNLU";
+const apiArgumentFrame = {"analysis_code":"morp","text":""};
+const allowMorpChecklist = [ "NNG","NNP","NNB","VA","MM","MAG","SL","SH","SN","XPN","XSN","XSA","ETM"];
+const vvMorpChecklist = ["ETM","ETN"];
 
-const query = "WiseNLU";
-const argumentFrame = {
-    "analysis_code":"morp",
-    "text":""
-};
+/**
+ * @param data (jsObject) morp 분석 결과와 원문 텍스트 | *data.text - 원문텍스트 *data.morps - morp 분석 결과
+ * @returns (jsObject) *.result - 결과 list
+ * @description morp 분석 결과를 원문과 비교해서 공백 단위의 리스트로 묶어서 반환해줍니다.
+ */
+const divideMorpbyBlank = ( data ) => {
+    let tempPos = 0,
+        blankPos = [],
+        morpTemp = [],
+        blankMorp = [];
 
-const fineMorp = [ "NNG","NNP","NNB","VA","MM","MAG","SL","SH","SN","XPN","XSN","XSA","ETM"]
-const vvCheck = ["ETM","ETN"];
-
-
-const getMorp=(data)=>{
-    return new Promise((resolve,reject)=>{
-        let pos = 0;
-        let posArray = [];
-        let temp=[]
-        let result = [];
-        for(let ch of data.text){
-            if(ch == ' '){
-                posArray.push(pos);
-            }
-            pos+=Buffer.byteLength(ch);
+    for( let ch of data.text ) {
+        if( ch == ' ' ) {
+            blankPos.push( tempPos );
         }
-
-        pos = 0;
-        data.morps.forEach(morp => {
-            if(pos==posArray.length || posArray[pos]>morp.position) temp.push(morp);
-            else{
-                result.push(temp);
-                pos++;
-                temp=[];
-                temp.push(morp);
-            }
-        });
-        result.push(temp);
-
-        resolve({"result":result,"text":data.text,"posArray":posArray});
-    });
-}
-
-const makeKeyword=(originalText,needMorp)=>{
-    let keyword = "";
-    let bytePos = 0;
-    let temp = 0;
-    let adding = false;
-    let plus = 0;
-    let posArray = [];
-    for(let word of needMorp){
-        word.forEach(elem =>{
-            if(posArray.length ==0)
-                posArray.push([elem.position,Buffer.byteLength(elem.lemma)]);
-            else{
-                // 중복 제거
-                if(posArray[posArray.length-1][0]!=elem.position||posArray[posArray.length-1][1]!=Buffer.byteLength(elem.lemma))
-                    posArray.push([elem.position,Buffer.byteLength(elem.lemma)]);
-            }
-        });
+        tempPos += Buffer.byteLength( ch );
     }
-    for(let i=0; i < originalText.length; i++){
-        if(posArray.length-1 < temp) break;
-        if(bytePos == posArray[temp][0]){
-            adding = true;
-        }
-        if(adding == true){
-            keyword+= originalText[i];
-            plus += Buffer.byteLength(originalText[i]);
 
-            if(plus == posArray[temp][1]){
-                plus = 0;
-                temp++;
-                adding = false;
-                if(originalText[i+1] == ' ')
-                    if(keyword[keyword.length-1]!= ' ') keyword+=' ';
-            }    
+    tempPos = 0;
+    data.morps.forEach( ( morp ) => {
+        if( tempPos == blankPos.length || blankPos[ tempPos ] > morp.position ) { 
+            morpTemp.push( morp );
+        } else {
+            blankMorp.push( morpTemp );
+            tempPos++;
+            morpTemp = [];
+            morpTemp.push( morp );
         }
-        bytePos += Buffer.byteLength(originalText[i]);
-    };
-    return keyword;
+    });
+    blankMorp.push( morpTemp );
+    return { "result" : blankMorp };
 }
 
-const getKeyword=(result)=>{
-    let data = result.result;
-    let originalText = result.text;
-    let needMorp = [];
-    let noNeedMorp = [];
-    let keyword = "";
 
-    for(let j=0; j < data.length; j++){
-        let needMorpTemp = [];
-        let noNeedMorpTemp = [];
-        let type = 0;
-        let check = false;
+/**
+ * @param data (jsObject) 이중어레이 blankMorp를 품고있습니다. *data.result - blankMorp
+ * @returns morp를 needMorp와 noNeedMorp로 나눴습니다. *.needMorp - needMorp *.noNeedMorp = noNeedMorp
+ * @description 공백 단위로 나뉜 morp를 받아 의미에 따라 필요성으로 나눕니다.
+ */
+const divideMorpbyMean = ( data ) => {
+    let blankMorp = data.result,
+        needMorp = [],
+        noNeedMorp = [];
 
-        data[j].find(morp=>{
-            if(morp.type == "VV") type = 1;
-            if(morp.type=="EC"|| morp.type == "EF") type=2;
-            if(morp.type == "XSV") type = 3;
-        })
-        switch(type){
+    blankMorp.forEach( ( word, j ) => {
+        let needMorpTemp = [],
+            noNeedMorpTemp = [],
+            type = 0,
+            check = false;
+
+        word.find( ( Morp ) => {
+            if( Morp.type == "VV" )  { type = 1 } ;
+            if( Morp.type == "EC" || Morp.type == "EF" ) { type = 2 };
+            if( Morp.type == "XSV" ) { type = 3 };
+        });
+        switch( type ) {
             case 3:
                 let checkTemp = true;
-                data[j].forEach((morp)=>{
-                    if(fineMorp.indexOf(morp.type)!=-1) checkTemp = false});
-                if(checkTemp == false) needMorp.push(data[j])
-                else noNeedMorp.push(data[j]);
+                word.forEach( ( morp ) => {
+                    if( allowMorpChecklist.indexOf( morp.type ) != -1 ) {
+                        checkTemp = false;
+                    }
+                });
+
+                if( checkTemp == false ) {
+                    needMorp.push( word );
+                } else {
+                    noNeedMorp.push( word );
+                };
                 break;
 
             case 2:
                 let temp = true;
-                if(data[j][0].type=="NNG"){
-                    data[j].forEach((morp)=>{
-                        if(fineMorp.indexOf(morp.type)!=-1) needMorpTemp.push(morp);
-                        else noNeedMorpTemp.push(morp);
-                    })
-                    if(noNeedMorpTemp.length > 0) noNeedMorp.push(noNeedMorpTemp);
-                    if(needMorpTemp.length > 0) needMorp.push(needMorpTemp);
-                }
-                else{
-                    if(data.length>j+1){
-                        data[j+1].forEach((morp)=>{if(fineMorp.indexOf(morp.type)!=-1) temp = false;});
+                if( word[ 0 ].type == "NNG" ) {
+                    word.forEach( ( morp ) => {
+                        if( allowMorpChecklist.indexOf( morp.type ) != -1 ) { 
+                            needMorpTemp.push( morp );
+                        } else {
+                            noNeedMorpTemp.push( morp );
+                        }
+                    });
+                    if( noNeedMorpTemp.length ) {
+                        noNeedMorp.push(noNeedMorpTemp);
                     }
-                    else{
+                    if( needMorpTemp.length ) {
+                        needMorp.push(needMorpTemp);
+                    }
+                } else {
+                    if( blankMorp.length > j + 1 ) {
+                        blankMorp[ j + 1 ].forEach( ( morp ) => {
+                            if( allowMorpChecklist.indexOf( morp.type ) != -1 ) {
+                                temp = false;
+                            }
+                        });
+                    } else {
                         temp == true;
                     }
-                    if(temp == false) needMorp.push(data[j])
-                    else noNeedMorp.push(data[j]);
+                    if( temp == false ) { 
+                        needMorp.push( word )
+                    } else {
+                        noNeedMorp.push( word );
+                    }
                 }
                 break;
 
             case 1:
-                for(let i = 0; i < data[j].length; i++){
-                    if(vvCheck.indexOf(data[j][i].type)!=-1){
+                word.forEach( ( Morp ) => {
+                    if( vvMorpChecklist.indexOf( Morp.type ) != -1 ) {
                         check = true;
-                        needMorp.push(data[j]);
+                        needMorp.push( word );
                     }
+                });
+                if( check == false ) {
+                    noNeedMorp.push(word);
                 }
-                if(check == false) noNeedMorp.push(data[j]);
                 break;
         
             case 0:
-                data[j].forEach((morp)=>{
-                    if(fineMorp.indexOf(morp.type)!=-1) needMorpTemp.push(morp);
-                    else noNeedMorpTemp.push(morp);
-                })
-                if(noNeedMorpTemp.length > 0) noNeedMorp.push(noNeedMorpTemp);
-                if(needMorpTemp.length > 0) needMorp.push(needMorpTemp);
+                word.forEach( ( Morp ) => {
+                    if( allowMorpChecklist.indexOf( Morp.type ) != -1 ) {
+                        needMorpTemp.push( Morp );
+                    } else { 
+                        noNeedMorpTemp.push( Morp );
+                    }
+                });
+                if( noNeedMorpTemp.length > 0 ) { 
+                    noNeedMorp.push( noNeedMorpTemp );
+                }
+                if( needMorpTemp.length > 0 ) {
+                    needMorp.push( needMorpTemp );
+                }
                 break;
         }
-    }
-    keyword = makeKeyword(originalText,needMorp); 
-    return({"morp":{"needMorp":needMorp,"noNeedMorp":noNeedMorp},"keyword" :keyword});
+    });
+    
+    return [ needMorp, noNeedMorp ];
 }
 
-const textAnalystic=async(getData)=>{
-    let fixedText = await koreanReq(getData.text); //맞춤법 API
+/**
+ * @param originalText (string) 원래 문장입니다.
+ * @param needMorp (array) 필요한 morp가 단어 단위로 array로 묶인 이중 어레이입니다.
+ * @returns 키워드입니다.
+ * @description 필요한 morp와 원문 텍스트를 이용해 문장에서의 키워드를 분석해 문장으로 만들어 줍니다.
+ */
+const makeKeyword = ( originalText, needMorp ) => {
+    let keyword = "",
+        bytePos = 0,
+        tempPos = 0,
+        plusUntil = 0,
+        blankPos = [],
+        WordBlankPos = [],
+        isAdding = false;
 
-    let argument = argumentFrame;
-    argumentFrame.text = fixedText.message.result.notag_html;
-    let getText = await apiReq(query,argument);
+    needMorp.forEach( ( needMorpWord, i ) => {
+        needMorpWord.forEach( ( Morp, j ) => {
+            if( i == 0 && j == 0 ) {
+                WordBlankPos = [ Morp.position, Buffer.byteLength( Morp.lemma ) ];
+            } else {
+                if( WordBlankPos[ 0 ] <= Morp.position && WordBlankPos[ 0 ] + WordBlankPos[ 1 ] >= Morp.position ) {
+                    if(  WordBlankPos[ 0 ] + WordBlankPos[ 1 ] < Morp.position + Buffer.byteLength( Morp.lemma ) ) {
+                        WordBlankPos[ 1 ] += Buffer.byteLength( Morp.lemma );
+                    }
+                } else {
+                    blankPos.push( WordBlankPos );
+                    WordBlankPos = [ Morp.position, Buffer.byteLength( Morp.lemma ) ];
+                }
+            }
+        });
+    });
+    blankPos.push( WordBlankPos );
+     // break 사용위해
+    for( let i = 0; i < originalText.length; i++ ) {    
+        if( blankPos.length-1 < tempPos ) {
+            break;
+        } 
+        if( bytePos == blankPos[ tempPos ][ 0 ] ) {
+            isAdding = true;
+        }
+        if( isAdding == true ) {
+            keyword += originalText[ i ];
+            plusUntil += Buffer.byteLength( originalText[ i ] );
 
-    let morpText ={"morps":getText.return_object.sentence[0].morp,"text":getText.return_object.sentence[0].text};
+            if( plusUntil == blankPos[ tempPos ][ 1 ] ) {
+                plusUntil = 0;
+                tempPos++;
+                isAdding = false;
+                if( originalText[ i + 1 ] == ' ' ) {
+                    if( keyword[ keyword.length - 1 ] != ' ' ) {
+                        keyword+=' ';
+                    }
+                }
+            }    
+        }
+        bytePos += Buffer.byteLength( originalText[ i ] );
+    };
+    return keyword;
+}
+
+/**
+ * @param clientData (jsObject) 클라이언트에서 받아온 데이터 *clientData.text - 분석할 텍스트
+ * @returns (jsObject) 분석 결과 데이터
+ * @description 클라이언트 데이터를 받아 의미를 분석하고 맞춤법을 교정해 돌려줍니다.
+ */
+const textAnalystic = async ( clientData ) => {
+    let result = {};
+    result.morps = {};
+
+    let fixedClientData = await apiConnect.koreanRequest( clientData.text );
+    result.korean = fixedClientData.message.result;
+    result.originalText = result.korean.notag_html;
+
+    let apiArgument = apiArgumentFrame;
+    apiArgumentFrame.text = result.originalText;
+     
+    let getText = await apiConnect.ETRIapiRequest( apiQuery, apiArgument );
+    result.morps.originalMorp = getText.return_object.sentence[0].morp;
     
-    let keywordText = await getMorp(morpText).then(getKeyword);
+    let divideMorp = divideMorpbyMean( divideMorpbyBlank ( { "morps" : result.morps.originalMorp, "text" : result.originalText } ) );
+    result.morps.needMorp = divideMorp[0], result.morps.noNeedMorp = divideMorp[1];
 
-    let result = {
-        "originalText":morpText.text,
-        "korean":fixedText.message.result,
-        "morp":keywordText.morp,
-        "keywordText":keywordText.keyword
-    }
-    return(result);
+    let keyword = makeKeyword(result.originalText,result.morps.needMorp); 
+    result.keywordText = keyword;
+
+    return result;
 }
 
 module.exports = textAnalystic;
