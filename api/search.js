@@ -7,6 +7,7 @@ const entities = new Entities();
 
 const searchURL = {
     "naver" : "https://search.naver.com/search.naver?",
+    "google" : "https://www.google.com/search?"
 }
 
 const search = {};
@@ -21,9 +22,22 @@ search.naver = ( keywordText ) => {
         .then( ( html ) => { // id가 main_pack
             const $ = cheerio.load( html );
             $("script").remove();
-            let mainHtml =  $( "#main_pack strong" ).parent().html();
-            console.log(mainHtml);
+            $( "#main_pack strong" ).each((i,elem)=>{
+                console.log("텍스트 :",entities.decode($(elem).parent().text()));
+                console.log("url :",entities.decode($(elem).parent().attr("href")));
+            });
             resolve( html );
+        })
+    })
+}
+
+search.google = (keywordText) => {
+    return new Promise((resolve, reject) => {
+        rp( {
+        "uri" : searchURL.google + "q=" + encodeURI( keywordText ),
+        })
+        .then((html) => {
+            
         })
     })
 }
