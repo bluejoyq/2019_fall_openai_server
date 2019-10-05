@@ -1,8 +1,7 @@
-require('dotenv').config();
 const rp = require("request-promise");
 const cheerio = require("cheerio");
 const Entities = require('html-entities').XmlEntities;
- 
+
 const entities = new Entities();
 
 const searchURL = {
@@ -10,39 +9,145 @@ const searchURL = {
     "google" : "https://www.google.com/search?"
 }
 
+/**
+ * @param main (string) 검색할 사이트의 메인 내용이 들어있는 셀렉터를 줘야합니다.
+ * @param keywordText (string) 분석할 키워드의 내용
+ * @param html (string) html 파싱한 내용
+ * @returns
+ * @description
+ */
+const getHtmlMainNaver = ( main, keywordText, html, naverURL ) => {
+    const $ = cheerio.load( html );
+    let result = [];
+
+    $( main ).each( (i, elem ) => {
+        let keywordCheck = false;
+
+        keywordText.split( ' ' ).forEach( ( Word ) => {
+            if( $( elem ).text().indexOf( Word ) != -1 ) {
+                keywordCheck = true;
+            } 
+        });
+        
+        if( keywordCheck ) {
+            let tempText = entities.decode( $( elem ).parent().parent().parent().text()),
+                tempUrl = $( elem ).parent().attr( "href" );
+                tempTitle = $( elem ).parent().attr( "title" );
+
+            if( tempUrl == undefined ) {
+                tempUrl = naverURL;
+            }
+            if(tempTitle == undefined) {
+                tempTitle = "네이버" // 타이틀이 없는 경우
+            }
+            if( !result.length ) {
+                if( keywordCheck ){
+                    result.push( { "title" : tempTitle, "text" : tempText, "url" : tempUrl } );
+                }    
+            } else if( keywordCheck ) {
+                // 공백 제거하고 비교
+                if( result[ result.length - 1 ].text.replace( /\s/g, '' ) != tempText.replace( /\s/g, '' ) ) {
+                    result.push( { "title" : tempTitle, "text" : tempText, "url" : tempUrl } );
+                }
+            }
+        }
+    });
+    return result;
+}
+
+/**
+ * @param main (string) 검색할 사이트의 메인 내용이 들어있는 셀렉터를 줘야합니다.
+ * @param keywordText (string) 분석할 키워드의 내용
+ * @param html (string) html 파싱한 내용
+ * @returns
+ * @description
+ */
+const getHtmlMainGoogle = ( main, keywordText, html, googleURL ) => {
+    const $ = cheerio.load( html );
+    let result = [];
+
+    $( main ).each( (i, elem ) => {
+        let keywordCheck = false;
+
+        keywordText.split( ' ' ).forEach( ( Word ) => {
+            if( $( elem ).parent().parent().text().indexOf( Word ) != -1 ) {
+                keywordCheck = true;
+            } 
+        });
+
+        if( keywordCheck ) {
+            let tempText = entities.decode( $( elem ).parent().parent().parent().text()),
+                tempUrl = decodeURIComponent( $( elem ).attr( "href" ) );
+                tempTitle = entities.decode( $( elem ).children( "div" ).text() ); // title 캐오기 수정 가능
+            
+            
+            if( tempUrl.indexOf( "/url?q=" ) == 0 ) {
+                tempUrl = tempUrl.replace( "/url?q=", "" );
+            } else if( tempUrl.indexOf( "/search?" ) == 0 )
+            {
+                tempUrl = "https://google.com" + tempUrl;
+            } else { 
+                tempUrl = googleURL;
+            }
+
+            if( !result.length ) {
+                if( keywordCheck ) {
+                    result.push( { "title" : tempTitle, "text" : tempText, "url" : tempUrl } );
+                }    
+            } else if( keywordCheck ) {
+                // 공백 제거하고 비교
+                if( result[ result.length - 1 ].text.replace( /\s/g, '' ) != tempText.replace( /\s/g, '' ) ) {
+                    result.push( { "title" : tempTitle, "text" : tempText, "url" : tempUrl } );
+                }
+            }
+        }
+    });
+    return result;
+}
+
 const search = {};
 
 search.naver = ( keywordText ) => {
-    return new Promise( ( resolve, reject ) => {
-        const result = [];
+    return new Promise( async ( resolve, reject ) => {
+        let naverMain = "#main_pack strong",
+            result = [],
+            naverURL = searchURL.naver + "query=" + encodeURI( keywordText );
         rp( { 
-            "uri" : searchURL.naver + "query=" + encodeURI( keywordText ), 
-            //"headers": { 'X-Naver-Client-Id' : process.env.NAVER_API_ID, 'X-Naver-Client-Secret' : process.env.NAVER_API_KEY } 
+            "uri" : naverURL, 
         } )
-        .then( ( html ) => { // id가 main_pack
-            const $ = cheerio.load( html );
-            $("script").remove();
-            $( "#main_pack strong" ).each((i,elem)=>{
-                console.log("텍스트 :",entities.decode($(elem).parent().text()));
-                console.log("url :",entities.decode($(elem).parent().attr("href")));
-            });
-            resolve( html );
+        .then( ( html ) => { 
+            result = getHtmlMainNaver( naverMain, keywordText, html, naverURL );
+            resolve( result );
         })
     })
 }
 
-search.google = (keywordText) => {
-    return new Promise((resolve, reject) => {
+search.google = ( keywordText ) => {
+    return new Promise( ( resolve, reject ) => {
+        let googleMain = "#main a", 
+            result = [],
+            googleURL = searchURL.google + "q=" + encodeURI( keywordText )
+
         rp( {
-        "uri" : searchURL.google + "q=" + encodeURI( keywordText ),
+            "uri" : googleURL,
         })
-        .then((html) => {
-            
+        .then( ( html ) => {
+            result = getHtmlMainGoogle( googleMain, keywordText, html, googleURL );
+            resolve( result );
         })
     })
 }
 
+const run=async()=>{
+    let startTime = new Date().getTime();
+    let result = {};
+    [result.naver,result.google]=await Promise.all( [ search.naver("경희대 학생 수"), search.google("경희대 학생 수") ] );
+    let endTime = new Date().getTime();
+    console.log("serach run 걸리는 시간 :",endTime - startTime);
+    console.log("네이이ㅣㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ버",result.naver);
+    console.log("구ㅜㅜㅜㅜㅜㅜ구ㅜㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱ글",result.google);
+}
 
+run();
 
-search.naver("경희대 학생 수");
 module.exports = search;

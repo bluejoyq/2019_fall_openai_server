@@ -1,4 +1,4 @@
-const apiConnect = require('./apiConnect');
+const apiConnect = require('./apiRequest');
 const search = require('./search');
 
 const apiQuery = "WiseNLU";
@@ -213,14 +213,14 @@ const textAnalystic = async ( clientData ) => {
     let result = {};
     result.morps = {};
 
-    let fixedClientData = await apiConnect.koreanRequest( clientData.text );
+    let fixedClientData = await apiConnect.Korean( clientData.text );
     result.korean = fixedClientData.message.result;
     result.originalText = result.korean.notag_html;
 
     let apiArgument = apiArgumentFrame;
     apiArgumentFrame.text = result.originalText;
      
-    let getText = await apiConnect.ETRIapiRequest( apiQuery, apiArgument );
+    let getText = await apiConnect.ETRI( apiQuery, apiArgument );
     result.morps.originalMorp = getText.return_object.sentence[0].morp;
     
     let divideMorp = divideMorpbyMean( divideMorpbyBlank ( { "morps" : result.morps.originalMorp, "text" : result.originalText } ) );

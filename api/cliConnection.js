@@ -20,12 +20,12 @@ const clientReq = async ( req , res ) => {
 const run = async () => {
     let startTime = new Date().getTime();
     let x = await textAnalytic({"text":"달리기 잘하는 방법을 알고 싶어요"});
+    let [y,z] = await Promise.all( [ search.naver(x.keywordText), search.google(x.keywordText) ] );
     let endTime = new Date().getTime();
-    let y = await search(x.keywordText);
     //console.log("need",x.morps.needMorp); 
     //console.log("notneed",x.morps.noNeedMorp); 
-    console.log("result",x);
-    console.log("걸리는 시간 :",endTime - startTime);
+    //console.log("result",x);
+    console.log("메인run 걸리는 시간 :",endTime - startTime);
 };
 
 run();
