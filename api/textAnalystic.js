@@ -1,5 +1,4 @@
 const apiConnect = require('./apiRequest');
-const search = require('./search');
 
 const apiQuery = "WiseNLU";
 const apiArgumentFrame = {"analysis_code":"morp","text":""};
