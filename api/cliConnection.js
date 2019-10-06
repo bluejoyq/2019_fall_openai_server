@@ -2,8 +2,9 @@ const textAnalytic=require('./textAnalystic');
 const search=require('./search');
 
 /** 
- * @param req req.body.data에 데이터가 들었습니다. data.type에 타입을 명시하고 data.text[나 data.voice에]-수정가능성 데이터를 넣어주세요.
- * @description client와 데이터를 받아 통신하는 함수입니다. 
+ * @param req - request
+ * @param req.body.data - client에서 보내는 데이터 req.body.data.text에 검색할 문장을 담아야 합니다
+ * @description client와 데이터를 받아 통신하는 함수입니다
 */
 const clientReq = async ( req , res ) => { 
 
@@ -11,7 +12,7 @@ const clientReq = async ( req , res ) => {
 
     let analyzeData = await textAnalytic( clientData );
 
-    await search(analyzeData.keywordText);
+    await Promise.all( [ search.naver(x.keywordText), search.google(x.keywordText) ] );
 };
 
 /**

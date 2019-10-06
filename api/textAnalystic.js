@@ -6,8 +6,10 @@ const allowMorpChecklist = [ "NNG","NNP","NNB","VA","MM","MAG","SL","SH","SN","X
 const vvMorpChecklist = ["ETM","ETN"];
 
 /**
- * @param data (jsObject) morp 분석 결과와 원문 텍스트 | *data.text - 원문텍스트 *data.morps - morp 분석 결과
- * @returns (jsObject) *.result - 결과 list
+ * @param {Object} data - morp 분석 결과와 원문 텍스트가 담김
+ * @param {{lemma:string, position:number, type:string}[]} data.morps - morp 분석 결과
+ * @param {String} data.text - 검색 원문 텍스트 
+ * @returns {Object} returns.result = 결과 list
  * @description morp 분석 결과를 원문과 비교해서 공백 단위의 리스트로 묶어서 반환해줍니다.
  */
 const divideMorpbyBlank = ( data ) => {
@@ -35,17 +37,18 @@ const divideMorpbyBlank = ( data ) => {
         }
     });
     blankMorp.push( morpTemp );
-    return { "result" : blankMorp };
+    return { "blankMorp" : blankMorp };
 }
 
 
 /**
- * @param data (jsObject) 이중어레이 blankMorp를 품고있습니다. *data.result - blankMorp
- * @returns morp를 needMorp와 noNeedMorp로 나눴습니다. *.needMorp - needMorp *.noNeedMorp = noNeedMorp
- * @description 공백 단위로 나뉜 morp를 받아 의미에 따라 필요성으로 나눕니다.
+ * @param {Object} data - 이중어레이 blankMorp를 품고있습니다.
+ * @param {{lemma:string, position:number, type:string}[][]} data.blankMorp - 공백 단위로 묶어둠 ex) [[{감기}],[{걸리},{었},{을}],[{때}]]
+ * @returns {{needMorp : {}[][], noNeedMorp : {}[][]}} morp를 needMorp와 noNeedMorp로 나눴습니다.
+ * @description 공백 단위로 나뉜 morp를 받아 type과 의미에 따라 2가지로 분류합니다.
  */
 const divideMorpbyMean = ( data ) => {
-    let blankMorp = data.result,
+    let blankMorp = data.blankMorp,
         needMorp = [],
         noNeedMorp = [];
 
@@ -144,9 +147,9 @@ const divideMorpbyMean = ( data ) => {
 }
 
 /**
- * @param originalText (string) 원래 문장입니다.
- * @param needMorp (array) 필요한 morp가 단어 단위로 array로 묶인 이중 어레이입니다.
- * @returns 키워드입니다.
+ * @param {String} originalText - 원래 문장입니다.
+ * @param {{lemma:string, position:number, type:string}[][]} needMorp - 공백 단위로 묶어둠 ex) [[{감기}],[{걸리},{었},{을}],[{때}]]
+ * @returns {String} 필요한 단어만 남겨둔 문장입니다.
  * @description 필요한 morp와 원문 텍스트를 이용해 문장에서의 키워드를 분석해 문장으로 만들어 줍니다.
  */
 const makeKeyword = ( originalText, needMorp ) => {
@@ -204,8 +207,9 @@ const makeKeyword = ( originalText, needMorp ) => {
 }
 
 /**
- * @param clientData (jsObject) 클라이언트에서 받아온 데이터 *clientData.text - 분석할 텍스트
- * @returns (jsObject) 분석 결과 데이터
+ * @param {Object} clientData - 클라이언트에서 받아온 데이터 
+ * @param {String} clientData.text - 분석할 텍스트
+ * @returns {Object} 분석 결과 데이터
  * @description 클라이언트 데이터를 받아 의미를 분석하고 맞춤법을 교정해 돌려줍니다.
  */
 const textAnalystic = async ( clientData ) => {
