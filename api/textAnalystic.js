@@ -1,209 +1,128 @@
 const apiConnect = require('./apiRequest');
 
-const apiQuery = "WiseNLU";
-const apiArgumentFrame = {"analysis_code":"morp","text":""};
-const allowMorpChecklist = [ "NNG","NNP","NNB","VA","MM","MAG","SL","SH","SN","XPN","XSN","XSA","ETM"];
-const vvMorpChecklist = ["ETM","ETN"];
+const allowMorpChecklist = [ "NNG","NNP","NNB","VA","MM","MAG","SL","SH","SN","XPN","XSN","XSA","ETM","NOG" ];
+const vvMorpChecklist = ["ETM","ETN"]; // 명사형 전성어미(ex) '-(으)ㅁ', '-기'), 관형사형 전성어미(ex) '-ㄴ', '-', '-던', '-ㄹ')
 
 /**
- * @param {Object} data - morp 분석 결과와 원문 텍스트가 담김
- * @param {{lemma:string, position:number, type:string}[]} data.morps - morp 분석 결과
- * @param {String} data.text - 검색 원문 텍스트 
- * @returns {Object} returns.result = 결과 list
- * @description morp 분석 결과를 원문과 비교해서 공백 단위의 리스트로 묶어서 반환해줍니다.
+ * @param {{lemma:string, position:number, type:string}[]} word - 한 단어의 형태소 ex) [{걸리},{었},{을}]
+ * @param {{lemma:string, position:number, type:string}[][]} needMorp - 공백 단위로 묶어둠 ex) [[{감기}],[{걸리},{었},{을}],[{때}]
+ * @param {{lemma:string, position:number, type:string}[][]} noNeedMorp - 공백 단위로 묶어둠 ex) [[{감기}],[{걸리},{었},{을}],[{때}]
+ * @description word의 각 형태소의 type이 allowMorpChecklist에 있는지 확인하고 있으면 needMorp, 없으면 noNeedMorp에 추가합니다.
  */
-const divideMorpbyBlank = ( data ) => {
-    let tempPos = 0,
-        blankPos = [],
-        morpTemp = [],
-        blankMorp = [];
-
-    for( let ch of data.text ) {
-        if( ch == ' ' ) {
-            blankPos.push( tempPos );
-        }
-        tempPos += Buffer.byteLength( ch );
-    }
-
-    tempPos = 0;
-    data.morps.forEach( ( morp ) => {
-        if( tempPos == blankPos.length || blankPos[ tempPos ] > morp.position ) { 
-            morpTemp.push( morp );
+const checkMorp = (word,needMorp,noNeedMorp) => {
+    let needMorpTemp=[],
+    noNeedMorpTemp=[];
+    word.forEach( ( morp ) => {
+        if( allowMorpChecklist.indexOf( morp.type ) != -1 ) { 
+            needMorpTemp.push( morp );
         } else {
-            blankMorp.push( morpTemp );
-            tempPos++;
-            morpTemp = [];
-            morpTemp.push( morp );
+            noNeedMorpTemp.push( morp );
         }
     });
-    blankMorp.push( morpTemp );
-    return { "blankMorp" : blankMorp };
+    if( noNeedMorpTemp.length > 0) {
+        noNeedMorp.push(noNeedMorpTemp);
+    }
+    if( needMorpTemp.length > 0) {
+        needMorp.push(needMorpTemp);
+    }
 }
 
-
 /**
- * @param {Object} data - 이중어레이 blankMorp를 품고있습니다.
- * @param {{lemma:string, position:number, type:string}[][]} data.blankMorp - 공백 단위로 묶어둠 ex) [[{감기}],[{걸리},{었},{을}],[{때}]]
+ * @param {{lemma:string, position:number, type:string}[][]} tempMorps - 공백 단위로 묶어둠 ex) [[{감기}],[{걸리},{었},{을}],[{때}]]
  * @returns {{needMorp : {}[][], noNeedMorp : {}[][]}} morp를 needMorp와 noNeedMorp로 나눴습니다.
  * @description 공백 단위로 나뉜 morp를 받아 type과 의미에 따라 2가지로 분류합니다.
  */
-const divideMorpbyMean = ( data ) => {
-    let blankMorp = data.blankMorp,
-        needMorp = [],
-        noNeedMorp = [];
-
-    blankMorp.forEach( ( word, j ) => {
-        let needMorpTemp = [],
-            noNeedMorpTemp = [],
-            type = 0,
-            check = false;
-
-        word.find( ( Morp ) => {
-            if( Morp.type == "VV" )  { type = 1 } ;
-            if( Morp.type == "EC" || Morp.type == "EF" ) { type = 2 };
-            if( Morp.type == "XSV" ) { type = 3 };
-        });
-        switch( type ) {
-            case 3:
-                let checkTemp = true;
-                word.forEach( ( morp ) => {
-                    if( allowMorpChecklist.indexOf( morp.type ) != -1 ) {
-                        checkTemp = false;
-                    }
-                });
-
-                if( checkTemp == false ) {
-                    needMorp.push( word );
-                } else {
-                    noNeedMorp.push( word );
-                };
-                break;
-
-            case 2:
-                let temp = true;
-                if( word[ 0 ].type == "NNG" ) {
-                    word.forEach( ( morp ) => {
-                        if( allowMorpChecklist.indexOf( morp.type ) != -1 ) { 
-                            needMorpTemp.push( morp );
-                        } else {
-                            noNeedMorpTemp.push( morp );
-                        }
-                    });
-                    if( noNeedMorpTemp.length ) {
-                        noNeedMorp.push(noNeedMorpTemp);
-                    }
-                    if( needMorpTemp.length ) {
-                        needMorp.push(needMorpTemp);
-                    }
-                } else {
-                    if( blankMorp.length > j + 1 ) {
-                        blankMorp[ j + 1 ].forEach( ( morp ) => {
-                            if( allowMorpChecklist.indexOf( morp.type ) != -1 ) {
-                                temp = false;
+const divideMorpbyMean = ( tempMorps ) => {
+    let needMorp=[],
+        noNeedMorp=[];
+        
+    tempMorps.forEach( ( word, j ) => {
+                
+        if( word[ 0 ].type == "VV" ||  word[ 0 ].type == "VA" ||  word[ 0 ].type == "MAG") { // 동사, 형용사, 부사
+            let checkV = true,
+            checkM = true;
+            word.find( ( Morp ) => {
+                if( Morp.type == "EF" ) { // 종결어미
+                    checkV = false; 
+                } else if( Morp.type == "EC" ) { // 연결어미
+                    if( tempMorps.length > j + 1 ) {
+                        tempMorps[ j + 1 ].forEach( ( morp ) => {
+                            if( allowMorpChecklist.indexOf( morp.type ) == -1 ) {
+                                checkV = false;
                             }
                         });
-                    } else {
-                        temp == true;
                     }
-                    if( temp == false ) { 
-                        needMorp.push( word )
-                    } else {
-                        noNeedMorp.push( word );
-                    }
+                } else if(word[ 0 ].type == "MAG") { 
+                    if( Morp.type == "XSV" ) { // 동사파생 접미사
+                        check = false; 
+                    } 
                 }
-                break;
-
-            case 1:
-                word.forEach( ( Morp ) => {
-                    if( vvMorpChecklist.indexOf( Morp.type ) != -1 ) {
-                        check = true;
-                        needMorp.push( word );
-                    }
-                });
-                if( check == false ) {
-                    noNeedMorp.push(word);
-                }
-                break;
-        
-            case 0:
-                word.forEach( ( Morp ) => {
-                    if( allowMorpChecklist.indexOf( Morp.type ) != -1 ) {
-                        needMorpTemp.push( Morp );
-                    } else { 
-                        noNeedMorpTemp.push( Morp );
-                    }
-                });
-                if( noNeedMorpTemp.length > 0 ) { 
-                    noNeedMorp.push( noNeedMorpTemp );
-                }
-                if( needMorpTemp.length > 0 ) {
-                    needMorp.push( needMorpTemp );
-                }
-                break;
+            });
+            if( checkV && checkM) { 
+                needMorp.push(word);
+            } else { 
+                noNeedMorp.push(word); 
+            }
+        }
+        else {
+            checkMorp(word,needMorp,noNeedMorp);
         }
     });
-    
     return [ needMorp, noNeedMorp ];
 }
 
 /**
- * @param {String} originalText - 원래 문장입니다.
- * @param {{lemma:string, position:number, type:string}[][]} needMorp - 공백 단위로 묶어둠 ex) [[{감기}],[{걸리},{었},{을}],[{때}]]
+ * @param {String} result - 결과 담던거
+ * @param {{text : string, begin : number, end : number }[]} words 단어 분석 결과를 담는 어레이
+ * @param {{lemma:string, position:number, type:string, id : number}[][]} needMorp - 공백 단위로 묶어둠 ex) [[{감기}],[{걸리},{었},{을}],[{때}]]
  * @returns {String} 필요한 단어만 남겨둔 문장입니다.
  * @description 필요한 morp와 원문 텍스트를 이용해 문장에서의 키워드를 분석해 문장으로 만들어 줍니다.
  */
-const makeKeyword = ( originalText, needMorp ) => {
-    let keyword = "",
-        bytePos = 0,
-        tempPos = 0,
-        plusUntil = 0,
-        blankPos = [],
-        WordBlankPos = [],
-        isAdding = false;
+const makeKeyword = ( result, words, needMorp ) => {
+    let keywordText = "";
 
-    needMorp.forEach( ( needMorpWord, i ) => {
-        needMorpWord.forEach( ( Morp, j ) => {
-            if( i == 0 && j == 0 ) {
-                WordBlankPos = [ Morp.position, Buffer.byteLength( Morp.lemma ) ];
-            } else {
-                if( WordBlankPos[ 0 ] <= Morp.position && WordBlankPos[ 0 ] + WordBlankPos[ 1 ] >= Morp.position ) {
-                    if(  WordBlankPos[ 0 ] + WordBlankPos[ 1 ] < Morp.position + Buffer.byteLength( Morp.lemma ) ) {
-                        WordBlankPos[ 1 ] += Buffer.byteLength( Morp.lemma );
+    needMorp.forEach( ( morps ) => {
+        words.forEach( ( word ) => {
+            if( word.begin == morps[ 0 ].id ){
+                let tempByte = morps[ morps.length - 1 ].position - morps[0].position + Buffer.byteLength( morps[ morps.length - 1 ].lemma );
+                for( let ch of word.text ) {
+                    if( tempByte > 0 ) {
+                        keywordText += ch;
+                        tempByte -= Buffer.byteLength(ch)
                     }
-                } else {
-                    blankPos.push( WordBlankPos );
-                    WordBlankPos = [ Morp.position, Buffer.byteLength( Morp.lemma ) ];
                 }
             }
         });
+        keywordText += " ";
     });
-    blankPos.push( WordBlankPos );
-     // break 사용위해
-    for( let i = 0; i < originalText.length; i++ ) {    
-        if( blankPos.length-1 < tempPos ) {
-            break;
-        } 
-        if( bytePos == blankPos[ tempPos ][ 0 ] ) {
-            isAdding = true;
-        }
-        if( isAdding == true ) {
-            keyword += originalText[ i ];
-            plusUntil += Buffer.byteLength( originalText[ i ] );
+    result.keywordText = keywordText.trim();
+}
 
-            if( plusUntil == blankPos[ tempPos ][ 1 ] ) {
-                plusUntil = 0;
-                tempPos++;
-                isAdding = false;
-                if( originalText[ i + 1 ] == ' ' ) {
-                    if( keyword[ keyword.length - 1 ] != ' ' ) {
-                        keyword+=' ';
-                    }
-                }
-            }    
-        }
-        bytePos += Buffer.byteLength( originalText[ i ] );
-    };
-    return keyword;
+/**
+ * @param {String} result - 결과 담던거
+ * @param {{NE : {}[], Morp : {}[]}} analysisResult 분석 결과가 담겼습니다.
+ * @description morp를 처리하는 함수 입니다 ^^
+ */
+const divideMorp = async ( result, analysisResult ) => {
+    let tempResult = {},
+        tempMorps = [];
+    
+    analysisResult.NE.forEach( ( word ) => {
+        analysisResult.morp.forEach( ( morp, index ) => {
+            if( word.begin <= index && word.end >= index ) {
+                morp.type = "NOG";
+            }
+        });
+    });
+
+    analysisResult.word.forEach( ( word ) => {
+        tempMorps.push( analysisResult.morp.slice( word.begin, word.end + 1 ) );
+    });
+
+    tempResult.originalMorp = analysisResult.morp;
+    [ tempResult.needMorp, tempResult.noNeedMorp ] = await divideMorpbyMean( tempMorps );
+    await makeKeyword( result, analysisResult.word, tempResult.needMorp );
+    result.morps = tempResult;
 }
 
 /**
@@ -213,26 +132,23 @@ const makeKeyword = ( originalText, needMorp ) => {
  * @description 클라이언트 데이터를 받아 의미를 분석하고 맞춤법을 교정해 돌려줍니다.
  */
 const textAnalystic = async ( clientData ) => {
-    let result = {};
-    result.morps = {};
+    let result = { "originalText" : clientData.text },
+        fixedClientData = await apiConnect.Korean( result.originalText );
 
-    let fixedClientData = await apiConnect.Korean( clientData.text );
-    result.korean = fixedClientData.message.result;
-    result.originalText = result.korean.notag_html;
+    result.korean = fixedClientData;
+    result.fixedText = result.korean.notag_html;
 
-    let apiArgument = apiArgumentFrame;
-    apiArgumentFrame.text = result.originalText;
-     
-    let getText = await apiConnect.ETRI( apiQuery, apiArgument );
-    result.morps.originalMorp = getText.return_object.sentence[0].morp;
+    let textAnalystic = await apiConnect.ETRI( "WiseNLU", { "analysis_code" : "ner", "text" : result.fixedText } );
+
+    await divideMorp( result, textAnalystic.return_object.sentence[ 0 ] );
+    console.log(result);
+    console.log(result.morps);
     
-    let divideMorp = divideMorpbyMean( divideMorpbyBlank ( { "morps" : result.morps.originalMorp, "text" : result.originalText } ) );
-    result.morps.needMorp = divideMorp[0], result.morps.noNeedMorp = divideMorp[1];
-
-    let keyword = makeKeyword(result.originalText,result.morps.needMorp); 
-    result.keywordText = keyword;
-
     return result;
 }
+
+//"2019년 고등학교 1학년 교육과정은 어떻게 되나요?"
+//달리기 잘하는 방법을 알고 싶어요
+textAnalystic({"text":"세종대왕님 제송합니다."});
 
 module.exports = textAnalystic;

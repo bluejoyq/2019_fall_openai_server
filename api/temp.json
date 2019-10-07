@@ -1,0 +1,698 @@
+[
+    {
+        "id": 0,
+        "reserve_str": "",
+        "text": "감기 걸렸을 때 먹으면 좋은 것은?",
+        "morp": [
+            {
+                "id": 0,
+                "lemma": "감기",
+                "type": "NNG",
+                "position": 0,
+                "weight": 0.262769
+            },
+            {
+                "id": 1,
+                "lemma": "걸리",
+                "type": "VV",
+                "position": 7,
+                "weight": 0.0150266
+            },
+            {
+                "id": 2,
+                "lemma": "었",
+                "type": "EP",
+                "position": 10,
+                "weight": 0.9
+            },
+            {
+                "id": 3,
+                "lemma": "을",
+                "type": "ETM",
+                "position": 13,
+                "weight": 0.00734398
+            },
+            {
+                "id": 4,
+                "lemma": "때",
+                "type": "NNG",
+                "position": 17,
+                "weight": 0.656522
+            },
+            {
+                "id": 5,
+                "lemma": "먹",
+                "type": "VV",
+                "position": 21,
+                "weight": 0.0143325
+            },
+            {
+                "id": 6,
+                "lemma": "으면",
+                "type": "EC",
+                "position": 24,
+                "weight": 0.427071
+            },
+            {
+                "id": 7,
+                "lemma": "좋",
+                "type": "VA",
+                "position": 31,
+                "weight": 0.0501571
+            },
+            {
+                "id": 8,
+                "lemma": "은",
+                "type": "ETM",
+                "position": 34,
+                "weight": 0.155123
+            },
+            {
+                "id": 9,
+                "lemma": "것",
+                "type": "NNB",
+                "position": 38,
+                "weight": 0.228788
+            },
+            {
+                "id": 10,
+                "lemma": "은",
+                "type": "JX",
+                "position": 41,
+                "weight": 0.0688243
+            },
+            {
+                "id": 11,
+                "lemma": "?",
+                "type": "SF",
+                "position": 44,
+                "weight": 1
+            }
+        ],
+        "WSD": [
+            {
+                "id": 0,
+                "text": "감기",
+                "type": "NNG",
+                "scode": "04",
+                "weight": 5.37227,
+                "position": 0,
+                "begin": 0,
+                "end": 0
+            },
+            {
+                "id": 1,
+                "text": "걸리",
+                "type": "VV",
+                "scode": "01",
+                "weight": 5.4,
+                "position": 7,
+                "begin": 1,
+                "end": 1
+            },
+            {
+                "id": 2,
+                "text": "었",
+                "type": "EP",
+                "scode": "00",
+                "weight": 1,
+                "position": 10,
+                "begin": 2,
+                "end": 2
+            },
+            {
+                "id": 3,
+                "text": "을",
+                "type": "ETM",
+                "scode": "00",
+                "weight": 1,
+                "position": 13,
+                "begin": 3,
+                "end": 3
+            },
+            {
+                "id": 4,
+                "text": "때",
+                "type": "NNG",
+                "scode": "01",
+                "weight": 9.78611,
+                "position": 17,
+                "begin": 4,
+                "end": 4
+            },
+            {
+                "id": 5,
+                "text": "먹",
+                "type": "VV",
+                "scode": "02",
+                "weight": 5.4,
+                "position": 21,
+                "begin": 5,
+                "end": 5
+            },
+            {
+                "id": 6,
+                "text": "으면",
+                "type": "EC",
+                "scode": "00",
+                "weight": 1,
+                "position": 24,
+                "begin": 6,
+                "end": 6
+            },
+            {
+                "id": 7,
+                "text": "좋",
+                "type": "VA",
+                "scode": "01",
+                "weight": 4.4,
+                "position": 31,
+                "begin": 7,
+                "end": 7
+            },
+            {
+                "id": 8,
+                "text": "은",
+                "type": "ETM",
+                "scode": "00",
+                "weight": 1,
+                "position": 34,
+                "begin": 8,
+                "end": 8
+            },
+            {
+                "id": 9,
+                "text": "것",
+                "type": "NNB",
+                "scode": "01",
+                "weight": 4.4,
+                "position": 38,
+                "begin": 9,
+                "end": 9
+            },
+            {
+                "id": 10,
+                "text": "은",
+                "type": "JX",
+                "scode": "00",
+                "weight": 1,
+                "position": 41,
+                "begin": 10,
+                "end": 10
+            },
+            {
+                "id": 11,
+                "text": "?",
+                "type": "SF",
+                "scode": "00",
+                "weight": 1,
+                "position": 44,
+                "begin": 11,
+                "end": 11
+            }
+        ],
+        "word": [
+            {
+                "id": 0,
+                "text": "감기",
+                "type": "",
+                "begin": 0,
+                "end": 0
+            },
+            {
+                "id": 1,
+                "text": "걸렸을",
+                "type": "",
+                "begin": 1,
+                "end": 3
+            },
+            {
+                "id": 2,
+                "text": "때",
+                "type": "",
+                "begin": 4,
+                "end": 4
+            },
+            {
+                "id": 3,
+                "text": "먹으면",
+                "type": "",
+                "begin": 5,
+                "end": 6
+            },
+            {
+                "id": 4,
+                "text": "좋은",
+                "type": "",
+                "begin": 7,
+                "end": 8
+            },
+            {
+                "id": 5,
+                "text": "것은?",
+                "type": "",
+                "begin": 9,
+                "end": 11
+            }
+        ],
+        "NE": [
+            {
+                "id": 0,
+                "text": "감기",
+                "type": "TMM_DISEASE",
+                "begin": 0,
+                "end": 0,
+                "weight": 0.501121,
+                "common_noun": 0
+            }
+        ],
+        "dependency": [
+            {
+                "id": 0,
+                "text": "감기",
+                "head": 1,
+                "label": "NP_SBJ",
+                "mod": [],
+                "weight": 0.332654
+            },
+            {
+                "id": 1,
+                "text": "걸렸을",
+                "head": 2,
+                "label": "VP_MOD",
+                "mod": [
+                    0
+                ],
+                "weight": 0.755877
+            },
+            {
+                "id": 2,
+                "text": "때",
+                "head": 3,
+                "label": "NP_AJT",
+                "mod": [
+                    1
+                ],
+                "weight": 0.559697
+            },
+            {
+                "id": 3,
+                "text": "먹으면",
+                "head": 4,
+                "label": "VP",
+                "mod": [
+                    2
+                ],
+                "weight": 0.583292
+            },
+            {
+                "id": 4,
+                "text": "좋은",
+                "head": 5,
+                "label": "VP_MOD",
+                "mod": [
+                    3
+                ],
+                "weight": 0.586153
+            },
+            {
+                "id": 5,
+                "text": "것은?",
+                "head": -1,
+                "label": "NP_SBJ",
+                "mod": [
+                    4
+                ],
+                "weight": 0.025005
+            }
+        ],
+        "SRL": []
+    },
+    {
+        "id": 0,
+        "reserve_str": "",
+        "text": "2019년 고등학교 1학년 교육과정은 어떻게 되나요?",
+        "morp": [
+            {
+                "id": 0,
+                "lemma": "2019",
+                "type": "SN",
+                "position": 0,
+                "weight": 1
+            },
+            {
+                "id": 1,
+                "lemma": "년",
+                "type": "NNB",
+                "position": 4,
+                "weight": 0.414343
+            },
+            {
+                "id": 2,
+                "lemma": "고등",
+                "type": "NNG",
+                "position": 8,
+                "weight": 0.9
+            },
+            {
+                "id": 3,
+                "lemma": "학교",
+                "type": "NNG",
+                "position": 14,
+                "weight": 0.184769
+            },
+            {
+                "id": 4,
+                "lemma": "1",
+                "type": "SN",
+                "position": 21,
+                "weight": 1
+            },
+            {
+                "id": 5,
+                "lemma": "학년",
+                "type": "NNG",
+                "position": 22,
+                "weight": 0.9
+            },
+            {
+                "id": 6,
+                "lemma": "교육",
+                "type": "NNG",
+                "position": 29,
+                "weight": 0.9
+            },
+            {
+                "id": 7,
+                "lemma": "과정",
+                "type": "NNG",
+                "position": 35,
+                "weight": 0.184792
+            },
+            {
+                "id": 8,
+                "lemma": "은",
+                "type": "JX",
+                "position": 41,
+                "weight": 0.0449928
+            },
+            {
+                "id": 9,
+                "lemma": "어떻",
+                "type": "VA",
+                "position": 45,
+                "weight": 0.9
+            },
+            {
+                "id": 10,
+                "lemma": "게",
+                "type": "EC",
+                "position": 51,
+                "weight": 0.31879
+            },
+            {
+                "id": 11,
+                "lemma": "되",
+                "type": "VV",
+                "position": 55,
+                "weight": 0.209958
+            },
+            {
+                "id": 12,
+                "lemma": "나",
+                "type": "EF",
+                "position": 58,
+                "weight": 0.00177268
+            },
+            {
+                "id": 13,
+                "lemma": "요",
+                "type": "JX",
+                "position": 61,
+                "weight": 0.00618742
+            },
+            {
+                "id": 14,
+                "lemma": "?",
+                "type": "SF",
+                "position": 64,
+                "weight": 1
+            }
+        ],
+        "WSD": [
+            {
+                "id": 0,
+                "text": "2019",
+                "type": "SN",
+                "scode": "00",
+                "weight": 1,
+                "position": 0,
+                "begin": 0,
+                "end": 0
+            },
+            {
+                "id": 1,
+                "text": "년",
+                "type": "NNB",
+                "scode": "02",
+                "weight": 6.58851,
+                "position": 4,
+                "begin": 1,
+                "end": 1
+            },
+            {
+                "id": 2,
+                "text": "고등학교",
+                "type": "NNG",
+                "scode": "00",
+                "weight": 0,
+                "position": 8,
+                "begin": 2,
+                "end": 3
+            },
+            {
+                "id": 3,
+                "text": "1",
+                "type": "SN",
+                "scode": "00",
+                "weight": 1,
+                "position": 21,
+                "begin": 4,
+                "end": 4
+            },
+            {
+                "id": 4,
+                "text": "학년",
+                "type": "NNG",
+                "scode": "00",
+                "weight": 0,
+                "position": 22,
+                "begin": 5,
+                "end": 5
+            },
+            {
+                "id": 5,
+                "text": "교육과정",
+                "type": "NNG",
+                "scode": "00",
+                "weight": 0,
+                "position": 29,
+                "begin": 6,
+                "end": 7
+            },
+            {
+                "id": 6,
+                "text": "은",
+                "type": "JX",
+                "scode": "00",
+                "weight": 1,
+                "position": 41,
+                "begin": 8,
+                "end": 8
+            },
+            {
+                "id": 7,
+                "text": "어떻",
+                "type": "VA",
+                "scode": "00",
+                "weight": 0,
+                "position": 45,
+                "begin": 9,
+                "end": 9
+            },
+            {
+                "id": 8,
+                "text": "게",
+                "type": "EC",
+                "scode": "00",
+                "weight": 1,
+                "position": 51,
+                "begin": 10,
+                "end": 10
+            },
+            {
+                "id": 9,
+                "text": "되",
+                "type": "VV",
+                "scode": "01",
+                "weight": 6.6,
+                "position": 55,
+                "begin": 11,
+                "end": 11
+            },
+            {
+                "id": 10,
+                "text": "나",
+                "type": "EF",
+                "scode": "00",
+                "weight": 1,
+                "position": 58,
+                "begin": 12,
+                "end": 12
+            },
+            {
+                "id": 11,
+                "text": "요",
+                "type": "JX",
+                "scode": "00",
+                "weight": 1,
+                "position": 61,
+                "begin": 13,
+                "end": 13
+            },
+            {
+                "id": 12,
+                "text": "?",
+                "type": "SF",
+                "scode": "00",
+                "weight": 1,
+                "position": 64,
+                "begin": 14,
+                "end": 14
+            }
+        ],
+        "word": [
+            {
+                "id": 0,
+                "text": "2019년",
+                "type": "",
+                "begin": 0,
+                "end": 1
+            },
+            {
+                "id": 1,
+                "text": "고등학교",
+                "type": "",
+                "begin": 2,
+                "end": 3
+            },
+            {
+                "id": 2,
+                "text": "1학년",
+                "type": "",
+                "begin": 4,
+                "end": 5
+            },
+            {
+                "id": 3,
+                "text": "교육과정은",
+                "type": "",
+                "begin": 6,
+                "end": 8
+            },
+            {
+                "id": 4,
+                "text": "어떻게",
+                "type": "",
+                "begin": 9,
+                "end": 10
+            },
+            {
+                "id": 5,
+                "text": "되나요?",
+                "type": "",
+                "begin": 11,
+                "end": 14
+            }
+        ],
+        "NE": [
+            {
+                "id": 0,
+                "text": "2019년",
+                "type": "DT_YEAR",
+                "begin": 0,
+                "end": 1,
+                "weight": 0.557001,
+                "common_noun": 0
+            },
+            {
+                "id": 1,
+                "text": "1학년",
+                "type": "QT_ORDER",
+                "begin": 4,
+                "end": 5,
+                "weight": 0.527204,
+                "common_noun": 0
+            }
+        ],
+        "dependency": [
+            {
+                "id": 0,
+                "text": "2019년",
+                "head": 5,
+                "label": "NP_AJT",
+                "mod": [],
+                "weight": 0.325193
+            },
+            {
+                "id": 1,
+                "text": "고등학교",
+                "head": 2,
+                "label": "NP",
+                "mod": [],
+                "weight": 0.389875
+            },
+            {
+                "id": 2,
+                "text": "1학년",
+                "head": 3,
+                "label": "NP",
+                "mod": [
+                    1
+                ],
+                "weight": 0.614144
+            },
+            {
+                "id": 3,
+                "text": "교육과정은",
+                "head": 5,
+                "label": "NP_SBJ",
+                "mod": [
+                    2
+                ],
+                "weight": 0.694722
+            },
+            {
+                "id": 4,
+                "text": "어떻게",
+                "head": 5,
+                "label": "VP_AJT",
+                "mod": [],
+                "weight": 0.460489
+            },
+            {
+                "id": 5,
+                "text": "되나요?",
+                "head": -1,
+                "label": "VP",
+                "mod": [
+                    0,
+                    3,
+                    4
+                ],
+                "weight": 0.0184125
+            }
+        ],
+        "SRL": []
+    }
+]

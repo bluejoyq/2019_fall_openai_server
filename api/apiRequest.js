@@ -26,14 +26,14 @@ apiRequest.ETRI = async ( query, argument ) => {
     return new Promise( ( resolve, reject ) => { 
         let apiReqJson = apiRequestJsonFrame;
         apiReqJson.argument = argument;
-        let apiReqOption = { uri : URL.ETRI+query, body : JSON.stringify( apiReqJson ) };
+        let apiReqOption = { uri : URL.ETRI + query, body : JSON.stringify( apiReqJson ) };
         rp.post( apiReqOption )
             .then( ( body ) => {
                 resolve( JSON.parse( body ) );
             })
             .catch( ( err ) => {
-                console.log("Http Request Error");
-                console.log(err.response.body);
+                console.log( "Http Request Error" );
+                console.log( err.response.body );
             });
     })  
 }
@@ -44,13 +44,36 @@ apiRequest.ETRI = async ( query, argument ) => {
  * @description 네이버 맞춤법 사이트로 text를 보내서 응답을 받아옵니다.
 */
 apiRequest.Korean = async ( text ) => {
-    return new Promise((resolve,reject)=>{
-        rp({"uri":URL.Korean+encodeURI(text)})
-        .then((body)=>{
-            body = body.substring(1,body.length-2);
-            resolve(JSON.parse(body));
+    return new Promise( ( resolve,reject ) => {
+        rp( { "uri" : URL.Korean+encodeURI( text ) } )
+        .then( ( body ) => {
+            body = body.substring( 1, body.length - 2 );
+            resolve( JSON.parse( body ).message.result );
         });
     });
 }
+
+
+apiRequest.multiETRI = ( searchResults, keywordText ) => {
+    searchResults.forEach( async ( searchResult , index ) => {
+        let apiReqJson = apiRequestJsonFrame;
+        apiReqJson.argument = { "passage" : searchResult.passage, "question" : keywordText };
+        apiReqJson.access_key = process.env[ "ETRI_API_KEY_" + index ];
+        let apiReqOption = { uri : URL.ETRI + "MRCServlet", body : JSON.stringify( apiReqJson ) };
+
+        rp( apiReqOption )
+            .then( ( body ) => {
+                searchResult.confidence = JSON.parse( body ).message.result.return_object.MRCInfo.confidence;
+            })
+            .catch( ( err ) => {
+                console.log( "Http Request Error" );
+                console.log( err.response.body );
+            });
+    });
+
+    return searchResults;
+}
+//apiRequest.multiETRI("a",1);
+
 
 module.exports = apiRequest;

@@ -77,7 +77,7 @@ const naver = ( searchResult, $, elem , defaultURL ) => {
  */
 const searchToResult = (searchResult, result, keywordCheck) => {
     if( searchResult.title == undefined || !searchResult.title.length ) {
-        searchResult.title = searchResult.passage.split(' ')[0] + "...";
+        searchResult.title = searchResult.passage.split(' ').slice( 0, 3 ) + "...";
     }
 
     if( !result.length ) {
@@ -170,6 +170,6 @@ const run=async()=>{
     //console.log("구ㅜㅜㅜㅜㅜㅜ구ㅜㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱ글",result.google);
 }
 
-run();
+//run();
 
 module.exports = search;

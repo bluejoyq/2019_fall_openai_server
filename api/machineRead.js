@@ -1,7 +1,5 @@
 const apiConnect = require('./apiRequest');
 
-const apiQuery = "MRCServlet";   
-
 /**
  * @param {{url:string,title:string,passage:string}[]} searchResults 검색 결과 정리한것.
  * @param {string} keywordText 기계독해 시킬 질문의 텍스트
@@ -9,11 +7,21 @@ const apiQuery = "MRCServlet";
  * @description 기계독해를 사용하는 함수
  */
 const machineRead = async ( searchResults, keywordText ) => {
-    for( let searchResult of searchResults ) {
-        let tempResult = await apiConnect.ETRI( apiQuery, { "passage" : searchResult.passage, "question" : keywordText } );
-        searchResult.confidence = tempResult.return_object.MRCInfo.confidence;
+    let begin = 0,
+        end = 5;
+
+    for( ; begin < searchResults.length; begin += 5, end += 5 ) {
+        let tempResults = [];
+        if( end > searchResults.length ) {
+            end = searchResults.length;
+        }
+        tempResults = await apiConnect.multiETRI( searchResults.slice[ begin, end ], keywordText );
+        for( let num = begin; num < end; num++ ) {
+            searchResults[ num ] = tempResults[ num] ;
+        }
     }
     return searchResults;
 }
+
 
 module.exports = machineRead;   

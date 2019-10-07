@@ -1,5 +1,6 @@
 const textAnalytic=require('./textAnalystic');
 const search=require('./search');
+const machineRead = require('./machineRead'); // 테스트용
 
 /** 
  * @param req - request
@@ -12,22 +13,32 @@ const clientReq = async ( req , res ) => {
 
     let analyzeData = await textAnalytic( clientData );
 
-    await Promise.all( [ search.naver(x.keywordText), search.google(x.keywordText) ] );
-};
+    let searchData = await Promise.all( [ search.naver( analyzeData.keywordText ), search.google( analyzeData.keywordText ) ] );
+    searchData = searchData[ 0 ].concat( searchData[ 1 ] );
+
+    searchData = await machineRead( searchData, analyzeData.keywordText );
+    analyzeData.searchResults = searchData;
+
+    res.send( analyzeData );
+    res.status( 200 );
+};  
 
 /**
  * @description 기능을 테스트 하기 위한 함수입니다.
  */
 const run = async () => {
+    let keywordText = "2019년 고등학교 1학년 교육과정은 어떻게 되나요?"
     let startTime = new Date().getTime();
-    let x = await textAnalytic({"text":"달리기 잘하는 방법을 알고 싶어요"});
-    let [y,z] = await Promise.all( [ search.naver(x.keywordText), search.google(x.keywordText) ] );
+    let x = await textAnalytic({"text":keywordText});
+    //let searchResults = await Promise.all( [ search.naver(x.keywordText), search.google(x.keywordText) ] );
+    //searchResults = searchResults[0].concat(searchResults[1]);
+    // =  await machineRead(searchResults,keywordText);
     let endTime = new Date().getTime();
-    //console.log("need",x.morps.needMorp); 
-    //console.log("notneed",x.morps.noNeedMorp); 
-    //console.log("result",x);
+    
+    console.log("result",x.morps.originalMorp);
     console.log("메인run 걸리는 시간 :",endTime - startTime);
+    //console.log(searchResults);
 };
 
 run();
-module.exports = clientReq; 
+module.exports = clientReq;
