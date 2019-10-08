@@ -1,18 +1,25 @@
+const rp = require('request-promise');
 
-let a = [1,2,3,4,5,6];
+const list = [1,2,3,4,5,6,7,8]
 
-
-const run= async () =>{
-    await a.forEach( b=>{
-        b+= 1;
+const delay =(n)=>{
+    return new Promise(resolve =>{
+        resolve(n);
     })
-    console.log(a)
+} 
+
+const test = async(item) => {
+    await delay(10);
+    console.log(item);
 }
 
-const bRun = (b) =>{
-    b.forEach(elem => {
-        console.log(elem)
+
+const run = async () => {
+    const promises = list.map((elem,index)=>{
+        return test(elem);
     });
-}
-run();
 
+    await Promise.all(promises);
+}
+
+run();

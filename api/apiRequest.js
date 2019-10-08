@@ -60,41 +60,33 @@ apiRequest.Korean = async ( text ) => {
     });
 }
 
-const simpleETRI = ( apiReqOption ) => {
+const simpleETRI = ( apiReqOption, searchResults, index ) => {
     return new Promise( ( resolve, reject ) => { 
         rp.post( apiReqOption )
         .then( ( body ) => {
-            resolve(JSON.parse( body ).return_object.MRCInfo.confidence);
+            searchResults[ index ].confidence = JSON.parse( body ).return_object.MRCInfo.confidence;
+            resolve();
         })
         .catch( ( err ) => {
-            console.log(err.message);
+            console.log( err.message );
         });
     })
 }
 
-const searchLoop = async ( searchResults, keywordText ) =>{
-    let tempResults = [];
-    await searchResults.forEach( async ( searchResult , index ) => {
-        let apiReqJson = apiRequestJsonFrame;
-    
-        apiReqJson.argument = { "passage" : searchResult.passage, "question" : keywordText };
-        apiReqJson.access_key = process.env[ "ETRI_API_KEY_" + index ];
-        let apiReqOption = { uri : URL.ETRI + "MRCServlet", body : JSON.stringify( apiReqJson ) };
-        searchResult.confidence = await simpleETRI( apiReqOption );
-        tempResults.push(searchResult);
-        console.log("!",searchResult);
-        console.log("?",tempResults);
+const makeOption = async(searchResults, keywordText, index) => {
+    let apiReqJson = apiRequestJsonFrame;
+    apiReqJson.argument = { "passage" : searchResults[ index ].passage, "question" : keywordText };
+    apiReqJson.access_key = process.env[ "ETRI_API_KEY_" + index ];
+    await simpleETRI( { uri : URL.ETRI + "MRCServlet", body : JSON.stringify( apiReqJson ) }, searchResults, index )
+}
+
+apiRequest.multiETRI = async ( searchResults, keywordText ) => {
+    const Promises = await searchResults.map((searchResult, index)=>{
+        return makeOption( searchResults, keywordText, index );
     });
 
-    return tempResults;
+    await Promise.all( Promises );
 }
-apiRequest.multiETRI = async ( searchResults, keywordText ) => {
-    let tempResults = await searchLoop( searchResults, keywordText );
-    console.log("파이널",tempResults);
-    return tempResults;
-}
-//apiRequest.multiETRI("a",1);
 
 
 module.exports = apiRequest;
-

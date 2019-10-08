@@ -77,7 +77,7 @@ const naver = ( searchResult, $, elem , defaultURL ) => {
  */
 const searchToResult = (searchResult, result, keywordCheck) => {
     if( searchResult.title == undefined || !searchResult.title.length ) {
-        searchResult.title = searchResult.passage.split(' ').slice( 0, 3 ) + "...";
+        searchResult.title = searchResult.passage.split(' ').slice( 0, 3 ).toString().replace(/,/g) + "...";
     }
 
     if( !result.length ) {

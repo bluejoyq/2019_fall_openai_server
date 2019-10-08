@@ -7,15 +7,15 @@ const apiRequest = require('./apiRequest');
  * @description 기계독해를 사용하는 함수
  */
 const machineRead = async ( searchResults, keywordText ) => {
-    let keyNum = 5,
+    let keyNum =  5,
         ResultArray = [],
         divideSearchResults = [];
     for( let i = 0; i <= searchResults.length; i += keyNum ) {
         divideSearchResults.push( searchResults.slice( i, i + keyNum ) );
     }
     for( let divideSearchResult of divideSearchResults ) {
-        let tempResults = await apiRequest.multiETRI( divideSearchResult, keywordText );
-        ResultArray = ResultArray.concat(tempResults);
+        await apiRequest.multiETRI( divideSearchResult, keywordText );
+        ResultArray = ResultArray.concat( divideSearchResult );
     }
     searchResults = ResultArray;
     return searchResults;
