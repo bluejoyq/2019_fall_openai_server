@@ -8,21 +8,18 @@ const apiRequest = require('./apiRequest');
  */
 const machineRead = async ( searchResults, keywordText ) => {
     let keyNum = 5,
-        begin = 0,
-        end = keyNum;
-
-    for( ; begin < searchResults.length; begin += keyNum, end += keyNum ) {
-        let tempResults = [];
-        if( end > searchResults.length ) {
-            end = searchResults.length;
-        }
-        tempResults = await apiRequest.multiETRI( searchResults.slice( begin, end ), keywordText );
-        for( let num = begin; num < end; num++ ) {
-            searchResults[ num ] = tempResults[ num] ;
-        }
+        ResultArray = [],
+        divideSearchResults = [];
+    for( let i = 0; i <= searchResults.length; i += keyNum ) {
+        divideSearchResults.push( searchResults.slice( i, i + keyNum ) );
     }
+    for( let divideSearchResult of divideSearchResults ) {
+        let tempResults = await apiRequest.multiETRI( divideSearchResult, keywordText );
+        ResultArray = ResultArray.concat(tempResults);
+    }
+    searchResults = ResultArray;
     return searchResults;
 }
+// searchResults를 keyNum개씩 뜯어서 새 리스트로 만들고 요청보내면됨
 
-
-module.exports = machineRead;   
+module.exports = machineRead;
