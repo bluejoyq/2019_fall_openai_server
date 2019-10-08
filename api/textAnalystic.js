@@ -1,4 +1,4 @@
-const apiConnect = require('./apiRequest');
+const apiRequest = require('./apiRequest');
 
 const allowMorpChecklist = [ "NNG","NNP","NNB","VA","MM","MAG","SL","SH","SN","XPN","XSN","XSA","ETM","NOG" ];
 const vvMorpChecklist = ["ETM","ETN"]; // 명사형 전성어미(ex) '-(으)ㅁ', '-기'), 관형사형 전성어미(ex) '-ㄴ', '-', '-던', '-ㄹ')
@@ -9,9 +9,9 @@ const vvMorpChecklist = ["ETM","ETN"]; // 명사형 전성어미(ex) '-(으)ㅁ'
  * @param {{lemma:string, position:number, type:string}[][]} noNeedMorp - 공백 단위로 묶어둠 ex) [[{감기}],[{걸리},{었},{을}],[{때}]
  * @description word의 각 형태소의 type이 allowMorpChecklist에 있는지 확인하고 있으면 needMorp, 없으면 noNeedMorp에 추가합니다.
  */
-const checkMorp = (word,needMorp,noNeedMorp) => {
-    let needMorpTemp=[],
-    noNeedMorpTemp=[];
+const checkMorp = ( word, needMorp, noNeedMorp ) => {
+    let needMorpTemp = [],
+    noNeedMorpTemp = [];
     word.forEach( ( morp ) => {
         if( allowMorpChecklist.indexOf( morp.type ) != -1 ) { 
             needMorpTemp.push( morp );
@@ -20,10 +20,10 @@ const checkMorp = (word,needMorp,noNeedMorp) => {
         }
     });
     if( noNeedMorpTemp.length > 0) {
-        noNeedMorp.push(noNeedMorpTemp);
+        noNeedMorp.push( noNeedMorpTemp );
     }
     if( needMorpTemp.length > 0) {
-        needMorp.push(needMorpTemp);
+        needMorp.push( needMorpTemp );
     }
 }
 
@@ -33,8 +33,8 @@ const checkMorp = (word,needMorp,noNeedMorp) => {
  * @description 공백 단위로 나뉜 morp를 받아 type과 의미에 따라 2가지로 분류합니다.
  */
 const divideMorpbyMean = ( tempMorps ) => {
-    let needMorp=[],
-        noNeedMorp=[];
+    let needMorp = [],
+        noNeedMorp = [];
         
     tempMorps.forEach( ( word, j ) => {
                 
@@ -52,20 +52,20 @@ const divideMorpbyMean = ( tempMorps ) => {
                             }
                         });
                     }
-                } else if(word[ 0 ].type == "MAG") { 
+                } else if( word[ 0 ].type == "MAG") { 
                     if( Morp.type == "XSV" ) { // 동사파생 접미사
                         check = false; 
                     } 
                 }
             });
             if( checkV && checkM) { 
-                needMorp.push(word);
+                needMorp.push( word );
             } else { 
-                noNeedMorp.push(word); 
+                noNeedMorp.push( word ); 
             }
         }
         else {
-            checkMorp(word,needMorp,noNeedMorp);
+            checkMorp( word, needMorp, noNeedMorp );
         }
     });
     return [ needMorp, noNeedMorp ];
@@ -133,22 +133,36 @@ const divideMorp = async ( result, analysisResult ) => {
  */
 const textAnalystic = async ( clientData ) => {
     let result = { "originalText" : clientData.text },
-        fixedClientData = await apiConnect.Korean( result.originalText );
+        fixedClientData,
+        textAnalystic;
+
+    fixedClientData = await apiRequest.Korean( result.originalText );
+    try {
+        if( !fixedClientData.origin_html.replace( /<\w+[^>]*>(.*?)<\/\w+>/g, '' ).replace( /\s/g, '' ).length ) {
+            throw new Error( "wrong keyword" );
+        }
+    }
+    catch( err ) {
+        throw new Error( err.message );
+    }
 
     result.korean = fixedClientData;
     result.fixedText = result.korean.notag_html;
 
-    let textAnalystic = await apiConnect.ETRI( "WiseNLU", { "analysis_code" : "ner", "text" : result.fixedText } );
+    try {
+        textAnalystic = await apiRequest.ETRI( "WiseNLU", { "analysis_code" : "ner", "text" : result.fixedText } );
+    }
+    catch( err ) {
+        throw new Error( err.message );
+    }
 
     await divideMorp( result, textAnalystic.return_object.sentence[ 0 ] );
-    console.log(result);
-    console.log(result.morps);
     
     return result;
 }
 
 //"2019년 고등학교 1학년 교육과정은 어떻게 되나요?"
 //달리기 잘하는 방법을 알고 싶어요
-textAnalystic({"text":"세종대왕님 제송합니다."});
+//textAnalystic({"text":"세종대왕님 제송합니다."});
 
 module.exports = textAnalystic;

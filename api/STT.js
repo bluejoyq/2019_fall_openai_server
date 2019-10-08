@@ -1,4 +1,4 @@
-const apiConnect = require('./apiConnect');
+const apiRequest = require('./apiRequest');
 
 /**
  * @param {Object} clientData 클라이언트에서 보낸 데이터
@@ -7,20 +7,20 @@ const apiConnect = require('./apiConnect');
  * @description 음성 인식을 요청해 결과를 내놓는 함수이다.
  */
 const apiReq = async ( clientData ) => {
-    let getSTT = await apiConnect.ETRI( "WiseASR/Recognition", { "language_code" : "korean", "audio" : clientData.audio } );
+    let getSTT = await apiRequest.ETRI( "WiseASR/Recognition", { "language_code" : "korean", "audio" : clientData.audio } );
     return { "text" : getSTT.return_object.recognized };
 }
 
 /**
  * @param req request
- * @param req.bdoy.data req.bdoy.data.audio에 요청하는 데이터가 들어있어야한다
+ * @param req.bdoy.data req.body.data.audio에 요청하는 데이터가 들어있어야한다
  * @description 오디로를 텍스트로 바꿔준다. 
  */
 const STT = async ( req, res ) => { 
     let clientData = JSON.parse( req.body.data ),
         voiceTemp = await apiReq( clientData );
 
-    res.send( voiceTemp );
+    res.send( { "return_code" : 0, "return_data" : voiceTemp } );
     res.status( 200 );
 };
 

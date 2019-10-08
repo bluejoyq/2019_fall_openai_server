@@ -27,14 +27,18 @@ apiRequest.ETRI = async ( query, argument ) => {
         let apiReqJson = apiRequestJsonFrame;
         apiReqJson.argument = argument;
         let apiReqOption = { uri : URL.ETRI + query, body : JSON.stringify( apiReqJson ) };
+ 
         rp.post( apiReqOption )
-            .then( ( body ) => {
-                resolve( JSON.parse( body ) );
-            })
-            .catch( ( err ) => {
-                console.log( "Http Request Error" );
-                console.log( err.response.body );
-            });
+        .then( ( body ) => {
+            body = JSON.parse( body );
+            if( body.result == "-1" ) {
+                throw new Error( body.reason );
+            }
+            resolve( body );
+        })
+        .catch( ( err ) => {
+            reject( err );
+        });       
     })  
 }
 
@@ -49,6 +53,9 @@ apiRequest.Korean = async ( text ) => {
         .then( ( body ) => {
             body = body.substring( 1, body.length - 2 );
             resolve( JSON.parse( body ).message.result );
+        })
+        .catch( ( err ) => {
+            throw new err( err );
         });
     });
 }
@@ -60,14 +67,14 @@ apiRequest.multiETRI = ( searchResults, keywordText ) => {
         apiReqJson.argument = { "passage" : searchResult.passage, "question" : keywordText };
         apiReqJson.access_key = process.env[ "ETRI_API_KEY_" + index ];
         let apiReqOption = { uri : URL.ETRI + "MRCServlet", body : JSON.stringify( apiReqJson ) };
-
+        // 만약 컨피던스가 없다면 예외처리
+        console.log(apiReqOption)
         rp( apiReqOption )
             .then( ( body ) => {
                 searchResult.confidence = JSON.parse( body ).message.result.return_object.MRCInfo.confidence;
             })
             .catch( ( err ) => {
-                console.log( "Http Request Error" );
-                console.log( err.response.body );
+                console.log(err.message);
             });
     });
 

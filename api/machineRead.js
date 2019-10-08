@@ -1,4 +1,4 @@
-const apiConnect = require('./apiRequest');
+const apiRequest = require('./apiRequest');
 
 /**
  * @param {{url:string,title:string,passage:string}[]} searchResults 검색 결과 정리한것.
@@ -7,15 +7,16 @@ const apiConnect = require('./apiRequest');
  * @description 기계독해를 사용하는 함수
  */
 const machineRead = async ( searchResults, keywordText ) => {
-    let begin = 0,
-        end = 5;
+    let keyNum = 5,
+        begin = 0,
+        end = keyNum;
 
-    for( ; begin < searchResults.length; begin += 5, end += 5 ) {
+    for( ; begin < searchResults.length; begin += keyNum, end += keyNum ) {
         let tempResults = [];
         if( end > searchResults.length ) {
             end = searchResults.length;
         }
-        tempResults = await apiConnect.multiETRI( searchResults.slice[ begin, end ], keywordText );
+        tempResults = await apiRequest.multiETRI( searchResults.slice( begin, end ), keywordText );
         for( let num = begin; num < end; num++ ) {
             searchResults[ num ] = tempResults[ num] ;
         }
