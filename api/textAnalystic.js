@@ -161,8 +161,4 @@ const textAnalystic = async ( clientData ) => {
     return result;
 }
 
-//"2019년 고등학교 1학년 교육과정은 어떻게 되나요?"
-//달리기 잘하는 방법을 알고 싶어요
-//textAnalystic({"text":"세종대왕님 제송합니다."});
-
 module.exports = textAnalystic;

@@ -10,16 +10,18 @@ const machineRead = async ( searchResults, keywordText ) => {
     let keyNum =  5,
         ResultArray = [],
         divideSearchResults = [];
+
     for( let i = 0; i <= searchResults.length; i += keyNum ) {
         divideSearchResults.push( searchResults.slice( i, i + keyNum ) );
     }
+
     for( let divideSearchResult of divideSearchResults ) {
         await apiRequest.multiETRI( divideSearchResult, keywordText );
         ResultArray = ResultArray.concat( divideSearchResult );
     }
+    
     searchResults = ResultArray;
     return searchResults;
 }
-// searchResults를 keyNum개씩 뜯어서 새 리스트로 만들고 요청보내면됨
 
 module.exports = machineRead;

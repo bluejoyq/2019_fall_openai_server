@@ -37,7 +37,7 @@ apiRequest.ETRI = async ( query, argument ) => {
             resolve( body );
         })
         .catch( ( err ) => {
-            reject( err );
+            throw new Error( err );
         });       
     })  
 }
@@ -55,7 +55,7 @@ apiRequest.Korean = async ( text ) => {
             resolve( JSON.parse( body ).message.result );
         })
         .catch( ( err ) => {
-            throw new err( err );
+            throw new Error( err );
         });
     });
 }
@@ -64,6 +64,9 @@ const simpleETRI = ( apiReqOption, searchResults, index ) => {
     return new Promise( ( resolve, reject ) => { 
         rp.post( apiReqOption )
         .then( ( body ) => {
+            if( body.result == "-1" ) {
+                throw new Error( body.reason + " index : " + index );
+            }
             searchResults[ index ].confidence = JSON.parse( body ).return_object.MRCInfo.confidence;
             resolve();
         })
@@ -77,15 +80,24 @@ const makeOption = async(searchResults, keywordText, index) => {
     let apiReqJson = apiRequestJsonFrame;
     apiReqJson.argument = { "passage" : searchResults[ index ].passage, "question" : keywordText };
     apiReqJson.access_key = process.env[ "ETRI_API_KEY_" + index ];
-    await simpleETRI( { uri : URL.ETRI + "MRCServlet", body : JSON.stringify( apiReqJson ) }, searchResults, index )
+    try { 
+        await simpleETRI( { uri : URL.ETRI + "MRCServlet", body : JSON.stringify( apiReqJson ) }, searchResults, index )
+    }
+    catch ( err ) {
+        throw new Error( err.message );
+    }
 }
 
 apiRequest.multiETRI = async ( searchResults, keywordText ) => {
-    const Promises = await searchResults.map((searchResult, index)=>{
-        return makeOption( searchResults, keywordText, index );
-    });
-
-    await Promise.all( Promises );
+    try {
+        const Promises = await searchResults.map((searchResult, index)=>{
+            return makeOption( searchResults, keywordText, index );
+        });
+        await Promise.all( Promises );
+    }
+    catch ( err ) {
+        throw new Error( err.message );
+    }
 }
 
 

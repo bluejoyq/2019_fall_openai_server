@@ -77,7 +77,7 @@ const naver = ( searchResult, $, elem , defaultURL ) => {
  */
 const searchToResult = (searchResult, result, keywordCheck) => {
     if( searchResult.title == undefined || !searchResult.title.length ) {
-        searchResult.title = searchResult.passage.split(' ').slice( 0, 3 ).toString().replace(/,/g) + "...";
+        searchResult.title = searchResult.passage.split(' ').slice( 0, 3 ).toString().replace(/,/g,' ') + "...";
     }
 
     if( !result.length ) {
@@ -134,6 +134,9 @@ search.naver = ( keywordText ) => {
             result = getHtmlMain( naverMain, keywordText, html, naverURL, naver );
             resolve( result );
         })
+        .catch( ( err ) => {
+            throw new Error( err );
+        });       
     })
 }
 
@@ -155,21 +158,10 @@ search.google = ( keywordText ) => {
             result = getHtmlMain( googleMain, keywordText, html, googleURL, google );
             resolve( result );
         })
+        .catch( ( err ) => {
+            throw new Error( err );
+        });       
     })
 }
-
-const run=async()=>{
-    let startTime = new Date().getTime();
-    let searchResults = await Promise.all( [ search.naver("경희대 학생 수"), search.google("경희대 학생 수") ] );
-    searchResults = searchResults[0].concat(searchResults[1]);
-    //searchResults =  await machineRead(searchResults,"경희대 학생 수")
-    let endTime = new Date().getTime();
-    console.log("serach run 걸리는 시간 :",endTime - startTime);
-    console.log(searchResults);
-    //console.log("네이이ㅣㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ버",result.naver);
-    //console.log("구ㅜㅜㅜㅜㅜㅜ구ㅜㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱ글",result.google);
-}
-
-//run();
 
 module.exports = search;

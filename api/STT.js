@@ -1,4 +1,5 @@
 const apiRequest = require('./apiRequest');
+const isBase64 = require('is-base64');
 
 /**
  * @param {Object} clientData 클라이언트에서 보낸 데이터
@@ -7,7 +8,14 @@ const apiRequest = require('./apiRequest');
  * @description 음성 인식을 요청해 결과를 내놓는 함수이다.
  */
 const apiReq = async ( clientData ) => {
-    let getSTT = await apiRequest.ETRI( "WiseASR/Recognition", { "language_code" : "korean", "audio" : clientData.audio } );
+    let getSTT = {};
+    try {
+        getSTT = await apiRequest.ETRI( "WiseASR/Recognition", { "language_code" : "korean", "audio" : clientData.audio } );
+    }
+    catch ( err ) {
+        throw new Error ( err.message );
+    }
+
     return { "text" : getSTT.return_object.recognized };
 }
 
@@ -17,9 +25,35 @@ const apiReq = async ( clientData ) => {
  * @description 오디로를 텍스트로 바꿔준다. 
  */
 const STT = async ( req, res ) => { 
-    let clientData = JSON.parse( req.body.data ),
-        voiceTemp = await apiReq( clientData );
+    let clientData,
+        voiceTemp;
 
+    try {
+        clientData = JSON.parse( req.body.data )
+        if( !clientData.audio.length ) {
+            throw new Error( "client audio empty" );
+        }
+        else if( isBase64( clientData.audio ) ) {
+            throw new Error( "Type error : audio type should be base64" );
+        }
+    }
+    catch( err ) {
+        console.log( err );
+        res.json( { "return_code" : -1, "error_code" : err.message } );
+        res.status( 403 );
+        return false;
+    }
+    
+    try {
+        voiceTemp = await apiReq( clientData );
+    }
+    catch( err ) {
+        console.log( err );
+        res.json( { "return_code" : -1, "error_code" : err.message } );
+        res.status( 502 );
+        return false;
+    }
+    
     res.send( { "return_code" : 0, "return_data" : voiceTemp } );
     res.status( 200 );
 };
